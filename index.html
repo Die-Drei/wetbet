@@ -1,14 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>WetBet.io – minigames _ maxfun</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WetBet.io – Trinkspiel Arena</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 40px;
+    }
+    .game-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .game-card {
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .game-card:hover {
+      transform: scale(1.05);
+      background: #292929;
+    }
+    .name-entry {
+      margin-top: 20px;
+    }
+    input {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      background: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
   <h1>WetBet.io</h1>
-  <p>Click a Game to start:</p>
-  <ul>
-    <li><a href="#">🍺 Horseride</a></li>
-    <li><a href="#">🥃 Crossgame</a></li>
-  </ul>
+  <p>Wähle dein Spiel – Der Verlierer trinkt!</p>
+
+  <div class="name-entry">
+    <input type="text" placeholder="Dein Name" id="playerName">
+    <button onclick="alert('Name gespeichert')">Start</button>
+  </div>
+
+  <div class="game-list">
+    <div class="game-card" onclick="startGame('Pferderennen')">🐎 Pferderennen</div>
+    <div class="game-card" onclick="startGame('Murmelrennen')">🔵 Murmelrennen</div>
+    <div class="game-card" onclick="startGame('Glücksrad')">🎡 Glücksrad</div>
+    <div class="game-card" onclick="startGame('Zahlenraten')">🔢 Zahlenraten</div>
+    <div class="game-card" onclick="startGame('Reaktionsspiel')">⚡ Reaktionsspiel</div>
+    <div class="game-card" onclick="startGame('Trinkduell')">🥤 Trinkduell</div>
+    <div class="game-card" onclick="startGame('Shotroulette')">🎲 Shotroulette</div>
+    <div class="game-card" onclick="startGame('Würfeln')">🎲 Würfeln</div>
+    <div class="game-card" onclick="startGame('Karten ziehen')">🃏 Karten ziehen</div>
+    <div class="game-card" onclick="startGame('Zufallssieger')">🤷‍♂️ Zufallssieger</div>
+  </div>
+
+  <script>
+    function startGame(gameName) {
+      const player = document.getElementById('playerName').value || 'Gast';
+      alert(player + " spielt jetzt: " + gameName);
+      // Hier kannst du später zu einem echten Spiel weiterleiten
+      // z.B. window.location.href = '/spiele/pferderennen.html'
+    }
+  </script>
 </body>
 </html>
