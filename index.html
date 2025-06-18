@@ -26,22 +26,34 @@
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+<!-- Cookie Consent Autoblock (Sprucejoy) -->
+<script src="https://cdn.jsdelivr.net/gh/sprucejoy/cookie-consent-autoblock-gdpr/cookie-consent.js" defer></script>
 
 <script>
-window.addEventListener("load", function(){
-  window.cookieconsent.initialise({
-    palette: { popup:{background:"#000"}, button:{background:"#f1d600"} },
-    theme: "classic",
-    content: {
-      message: "Diese Website verwendet Cookies zur Verbesserung.",
-      dismiss: "Verstanden",
-      link: "Mehr erfahren",
-      href: "/datenschutz.html"
+window.cookieconsent_settings = {
+  "cookiepolicy": {
+    "title": "Cookie-Einstellungen",
+    "message": "Diese Website verwendet Cookies für Analyse und Werbung.",
+    "link": "/datenschutz.html",
+    "linktext": "Datenschutz",
+    "dismiss": "Nur notwendige Cookies",
+    "allow": "Alle Cookies zulassen",
+    "autoclear_cookies": true,
+    "accept_all": true
+  },
+  "categories": {
+    "necessary": {
+      "needed": true,
+      "wanted": true,
+      "readonly": true
+    },
+    "advertising": {
+      "needed": false,
+      "wanted": false,
+      "readonly": false
     }
-  });
-});
+  }
+}
 </script>
 </head>
 <body>
