@@ -8,10 +8,69 @@
 	<link rel="stylesheet" type="text/css" href="index_html.css?h=7c95746c">
 
 	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+<!-- Klaro Cookie Banner Styles -->
+<link rel="stylesheet" href="https://cdn.kiprotect.com/klaro/v0.7.18/klaro.css" />
+<script src="https://cdn.kiprotect.com/klaro/v0.7.18/klaro.js" defer></script>
+
+<script defer>
+var klaroConfig = {
+  version: 1,
+  elementID: 'klaro',
+  cookieName: 'klaro',
+  htmlTexts: true,
+  privacyPolicy: '/datenschutz.html',
+  default: false,
+  mustConsent: true,
+  acceptAll: true,
+  translations: {
+    de: {
+      consentModal: {
+        title: 'Cookie-Einstellungen',
+        description: 'Wir verwenden Cookies für Analyse und Werbung. Du kannst selbst entscheiden, welche Cookies gesetzt werden dürfen.',
+      },
+      consentNotice: {
+        description: 'Diese Website verwendet Cookies für Analyse und Werbung.',
+        learnMore: 'Einstellungen',
+        acceptAll: 'Alle akzeptieren',
+        decline: 'Nur notwendige',
+      },
+      purposes: {
+        analytics: 'Besucherstatistik (Google Analytics)',
+        advertising: 'Werbung (Google AdSense)',
+      }
+    }
+  },
+  services: [
+    {
+      name: 'analytics',
+      title: 'Google Analytics',
+      purposes: ['analytics'],
+      cookies: [/^_ga/, /^_gid/, /^_gat/],
+      required: false,
+      optOut: false,
+      onlyOnce: true
+    },
+    {
+      name: 'adsense',
+      title: 'Google AdSense',
+      purposes: ['advertising'],
+      cookies: [/^_gads/, /^_gac/],
+      required: false,
+      optOut: false,
+      onlyOnce: true
+    }
+  ]
+};
+</script>
+
+
+
+<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="shortcut icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
+
 
 
 <!-- Google tag (gtag.js) -->
@@ -22,42 +81,6 @@
   gtag('js', new Date());
 
   gtag('config', 'G-ZPGS9CQX4T');
-</script>
-
-
-<!-- Cookie Consent Banner – DSGVO-konform -->
-<script src="https://cdn.jsdelivr.net/gh/sprucejoy/cookie-consent-autoblock-gdpr/cookie-consent.js" defer></script>
-
-<script>
-window.cookieconsent_settings = {
-  "cookiepolicy": {
-    "title": "Cookie-Einstellungen",
-    "message": "Diese Website verwendet Cookies für Analyse und Werbung.",
-    "link": "/datenschutz.html",
-    "linktext": "Datenschutzerklärung",
-    "dismiss": "Nur notwendige Cookies",
-    "allow": "Alle Cookies zulassen",
-    "autoclear_cookies": true,
-    "accept_all": true
-  },
-  "categories": {
-    "necessary": {
-      "needed": true,
-      "wanted": true,
-      "readonly": true
-    },
-    "analytics": {
-      "needed": false,
-      "wanted": false,
-      "readonly": false
-    },
-    "advertising": {
-      "needed": false,
-      "wanted": false,
-      "readonly": false
-    }
-  }
-}
 </script>
 </head>
 <body>
@@ -139,5 +162,16 @@ window.cookieconsent_settings = {
 <div style="clear:both"></div></div></div></div>
 <div style="clear:both"></div></div></div></div>
 <div style="clear:both"></div></div></div>  </div>
+	<!-- Google Analytics -->
+<script type="text/plain" data-name="analytics" data-type="application/javascript">
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+
+<!-- Google AdSense -->
+<script type="text/plain" data-name="adsense" data-type="application/javascript" async 
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 </body>
 </html>
