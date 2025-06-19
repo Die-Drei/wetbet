@@ -8,61 +8,76 @@
 	<link rel="stylesheet" type="text/css" href="index_html.css?h=7c95746c">
 
 	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-<!-- Klaro Cookie Banner Styles -->
+<!-- Klaro CSS und Script (nicht defer!) -->
 <link rel="stylesheet" href="https://cdn.kiprotect.com/klaro/v0.7.18/klaro.css" />
-<script src="https://cdn.kiprotect.com/klaro/v0.7.18/klaro.js" defer></script>
+<script src="https://cdn.kiprotect.com/klaro/v0.7.18/klaro.js"></script>
 
-<script defer>
-var klaroConfig = {
-  version: 1,
-  elementID: 'klaro',
-  cookieName: 'klaro',
-  htmlTexts: true,
-  privacyPolicy: '/datenschutz.html',
-  default: false,
-  mustConsent: true,
-  acceptAll: true,
-  translations: {
-    de: {
-      consentModal: {
-        title: 'Cookie-Einstellungen',
-        description: 'Wir verwenden Cookies für Analyse und Werbung. Du kannst selbst entscheiden, welche Cookies gesetzt werden dürfen.',
-      },
-      consentNotice: {
-        description: 'Diese Website verwendet Cookies für Analyse und Werbung.',
-        learnMore: 'Einstellungen',
-        acceptAll: 'Alle akzeptieren',
-        decline: 'Nur notwendige',
-      },
-      purposes: {
-        analytics: 'Besucherstatistik (Google Analytics)',
-        advertising: 'Werbung (Google AdSense)',
+<!-- Klaro-Konfiguration (wird per GeoIP nur bei EU-Nutzern aktiviert) -->
+<script>
+  const klaroConfig = {
+    version: 1,
+    elementID: 'klaro',
+    lang: 'de',
+    cookieName: 'klaro',
+    htmlTexts: true,
+    privacyPolicy: '/datenschutz.html',
+    default: false,
+    mustConsent: true,
+    acceptAll: true,
+    translations: {
+      de: {
+        consentModal: {
+          title: 'Cookie-Einstellungen',
+          description: 'Wir verwenden Cookies für Analyse und Werbung. Du kannst selbst entscheiden, welche Cookies gesetzt werden dürfen.',
+        },
+        consentNotice: {
+          description: 'Diese Website verwendet Cookies für Analyse und Werbung.',
+          learnMore: 'Einstellungen',
+          acceptAll: 'Alle akzeptieren',
+          decline: 'Nur notwendige',
+        },
+        purposes: {
+          analytics: 'Besucherstatistik (Google Analytics)',
+          advertising: 'Werbung (Google AdSense)',
+        }
       }
-    }
-  },
-  services: [
-    {
-      name: 'analytics',
-      title: 'Google Analytics',
-      purposes: ['analytics'],
-      cookies: [/^_ga/, /^_gid/, /^_gat/],
-      required: false,
-      optOut: false,
-      onlyOnce: true
     },
-    {
-      name: 'adsense',
-      title: 'Google AdSense',
-      purposes: ['advertising'],
-      cookies: [/^_gads/, /^_gac/],
-      required: false,
-      optOut: false,
-      onlyOnce: true
-    }
-  ]
-};
-</script>
+    services: [
+      {
+        name: 'analytics',
+        title: 'Google Analytics',
+        purposes: ['analytics'],
+        cookies: [/^_ga/, /^_gid/, /^_gat/],
+        required: false,
+        optOut: false,
+        onlyOnce: true
+      },
+      {
+        name: 'adsense',
+        title: 'Google AdSense',
+        purposes: ['advertising'],
+        cookies: [/^_gads/, /^_gac/],
+        required: false,
+        optOut: false,
+        onlyOnce: true
+      }
+    ]
+  };
 
+  // GeoIP-Prüfung: Cookie-Banner nur für EU-Länder anzeigen
+  fetch("https://ipapi.co/json")
+    .then(response => response.json())
+    .then(data => {
+      const euCountries = [
+        'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
+        'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
+        'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
+      ];
+      if (euCountries.includes(data.country_code)) {
+        klaro.setup(klaroConfig);
+      }
+    });
+</script>
 
 
 <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
