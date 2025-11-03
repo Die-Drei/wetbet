@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slotmaschine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle, #2c3e50, #34495e);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .slot-machine {
+            background: linear-gradient(145deg, #c0392b, #e74c3c);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.6),
+                inset 0 2px 0 rgba(255,255,255,0.2);
+            position: relative;
+            border: 8px solid #8b4513;
+        }
+
+        .machine-top {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            height: 40px;
+            border-radius: 20px;
+            margin: -20px -20px 20px -20px;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .title {
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            text-align: center;
+        }
+
+        .machine-body {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .reels-container {
+            background: #2c3e50;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 
+                inset 0 10px 20px rgba(0,0,0,0.8),
+                0 5px 15px rgba(0,0,0,0.3);
+            border: 5px solid #34495e;
+            display: flex;
+            gap: 10px;
+        }
+
+        .reel-window {
+            width: 100px;
+            height: 120px;
+            background: #fff;
+            border: 4px solid #bdc3c7;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 
+                inset 0 0 10px rgba(0,0,0,0.3),
+                0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .reel {
+            position: absolute;
+            width: 100%;
+            height: 500%; /* 5x die Höhe für 5 verschiedene Symbole */
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.5s ease-out;
+        }
+
+        .reel.spinning {
+            animation: spinVertical 0.1s linear infinite;
+            transition: none;
+        }
+
+        @keyframes spinVertical {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-120px); }
+        }
+
+        .reel-symbol {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .reel-symbol:last-child {
+            border-bottom: none;
+        }
+
+        .lever-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .lever-base {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(145deg, #7f8c8d, #95a5a6);
+            border-radius: 0 0 20px 20px;
+            box-shadow: 
+                0 5px 15px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.3);
+            position: relative;
+        }
+
+        .lever-arm {
+            width: 8px;
+            height: 150px;
+            background: linear-gradient(90deg, #bdc3c7, #ecf0f1);
+            position: absolute;
+            left: 50%;
+            top: -150px;
+            transform: translateX(-50%);
+            border-radius: 4px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+            transform-origin: bottom center;
+            transition: transform 0.3s ease;
+        }
+
+        .lever-handle {
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            box-shadow: 
+                0 3px 10px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+        }
+
+        .lever-handle:hover {
+            background: linear-gradient(145deg, #c0392b, #a93226);
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .lever-handle:active,
+        .lever-arm.pulled {
+            transform: translateX(-50%) rotate(20deg);
+        }
+
+        .lever-handle:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        .start-button {
+            background: linear-gradient(145deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .start-button:hover {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        .start-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            min-height: 50px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .machine-lights {
+            position: absolute;
+            top: -5px;
+            left: 20px;
+            right: 20px;
+            height: 10px;
+            background: linear-gradient(90deg, 
+                #f1c40f 0%, #e67e22 25%, #e74c3c 50%, #9b59b6 75%, #3498db 100%);
+            border-radius: 5px;
+            animation: lights 2s linear infinite;
+        }
+
+        @keyframes lights {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .coin-slot {
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            width: 15px;
+            height: 60px;
+            background: #2c3e50;
+            border-radius: 7px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="slot-machine">
+        <div class="machine-lights"></div>
+        <div class="coin-slot"></div>
+        <div class="machine-top">🎰 CLASSIC SLOT 🎰</div>
+        
+        <div class="machine-body">
+            <div class="reels-container">
+                <div class="reel-window">
+                    <div class="reel" id="reel1">
+                        <div class="reel-symbol">1x</div>
+                        <div class="reel-symbol">2x</div>
+                        <div class="reel-symbol">3x</div>
+                        <div class="reel-symbol">1x</div>
+                        <div class="reel-symbol">1x</div>
+                    </div>
+                </div>
+                
+                <div class="reel-window">
+                    <div class="reel" id="reel2">
+                        <div class="reel-symbol">🍺</div>
+                        <div class="reel-symbol">🥃</div>
+                        <div class="reel-symbol">🍺</div>
+                        <div class="reel-symbol">🥃</div>
+                        <div class="reel-symbol">🍺</div>
+                    </div>
+                </div>
+                
+                <div class="reel-window">
+                    <div class="reel" id="reel3">
+                        <div class="reel-symbol">self</div>
+                        <div class="reel-symbol">share</div>
+                        <div class="reel-symbol">self</div>
+                        <div class="reel-symbol">share</div>
+                        <div class="reel-symbol">self</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lever-container">
+                <div class="lever-base">
+                    <div class="lever-arm" id="leverArm">
+                        <div class="lever-handle" id="leverHandle" onclick="pullLever()"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="start-button" id="startButton" onclick="startSlot()">START GAME</button>
+        </div>
+
+        <div class="result" id="result">Pull the lever or press START!</div>
+    </div>
+
+    <script>
+        let isSpinning = false;
+        let spinTimeouts = [];
+
+        const reel1Values = ['1x', '2x', '3x', '4x'];
+        const reel2Values = ['🍺', '🥃'];
+        const reel3Values = ['self', 'share'];
+
+        let currentValues = {
+            reel1: '1x',
+            reel2: '🍺',
+            reel3: 'self'
+        };
+
+        function pullLever() {
+            if (isSpinning) return;
+            
+            // Hebel-Animation
+            const leverArm = document.getElementById('leverArm');
+            leverArm.classList.add('pulled');
+            
+            setTimeout(() => {
+                leverArm.classList.remove('pulled');
+            }, 300);
+
+            startSlot();
+        }
+
+        function startSlot() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('leverHandle').style.pointerEvents = 'none';
+            document.getElementById('result').textContent = 'The reels are spinning…';
+
+            // Alle Rollen zum Drehen bringen
+            const reel1 = document.getElementById('reel1');
+            const reel2 = document.getElementById('reel2');
+            const reel3 = document.getElementById('reel3');
+
+            reel1.classList.add('spinning');
+            reel2.classList.add('spinning');
+            reel3.classList.add('spinning');
+
+            // Erste Rolle stoppt nach 3 Sekunden
+            spinTimeouts.push(setTimeout(() => {
+                stopReel('reel1', reel1Values);
+            }, 3000));
+
+            // Zweite Rolle stoppt nach 5 Sekunden
+            spinTimeouts.push(setTimeout(() => {
+                stopReel('reel2', reel2Values);
+            }, 5000));
+
+            // Dritte Rolle stoppt nach 10 Sekunden
+            spinTimeouts.push(setTimeout(() => {
+                stopReel('reel3', reel3Values);
+                finishGame();
+            }, 10000));
+        }
+
+        function stopReel(reelId, values) {
+            const reel = document.getElementById(reelId);
+            reel.classList.remove('spinning');
+            
+            // Zufällige Position wählen
+            const randomIndex = Math.floor(Math.random() * values.length);
+            const randomValue = values[randomIndex];
+            
+            // Rolle an der richtigen Position stoppen
+            const translateY = -120 * randomIndex; // 120px pro Symbol
+            reel.style.transform = `translateY(${translateY}px)`;
+            
+            // Aktuellen Wert speichern
+            const reelNumber = reelId.replace('reel', '');
+            currentValues[reelId] = randomValue;
+        }
+
+        function finishGame() {
+            isSpinning = false;
+            document.getElementById('startButton').disabled = false;
+            document.getElementById('leverHandle').style.pointerEvents = 'auto';
+            
+            // Ergebnis anzeigen
+            const result = `${currentValues.reel1} | ${currentValues.reel2} | ${currentValues.reel3}`;
+            document.getElementById('result').textContent = result;
+            
+            // Gewinn prüfen
+            setTimeout(() => {
+                checkWin();
+            }, 1000);
+        }
+
+        function checkWin() {
+            let message = '';
+            
+            if (currentValues.reel1 === '4x' && currentValues.reel2 === '🍺' && currentValues.reel3 === 'share') {
+                message = '🎉 JACKPOT! 4 to share! 🎉';
+            } else if (currentValues.reel2 === '🥃' && currentValues.reel3 === 'self') {
+                message = '🥃 for your own!';
+            } else if (currentValues.reel2 === '🍺' && currentValues.reel3 === 'share') {
+                message = '🍻 time to share!';
+            } else if (currentValues.reel1 === '3x' || currentValues.reel1 === '4x') {
+                message = '🎊 good multi!';
+            } else {
+                message = 'try again!';
+            }
+            
+            document.getElementById('result').textContent += ' - ' + message;
+        }
+
+        function clearAllTimeouts() {
+            spinTimeouts.forEach(timeout => clearTimeout(timeout));
+            spinTimeouts = [];
+        }
+
+        // Tastatur-Steuerung
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && !isSpinning) {
+                event.preventDefault();
+                startSlot();
+            }
+        });
+
+        // Initiale Position der Rollen setzen
+        document.getElementById('reel1').style.transform = 'translateY(0px)';
+        document.getElementById('reel2').style.transform = 'translateY(0px)';
+        document.getElementById('reel3').style.transform = 'translateY(0px)';
+    </script>
+</body>
+</html>

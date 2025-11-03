@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Roulette-Spiel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a4c3a;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .wheel-container {
+            margin: 30px auto;
+            position: relative;
+            width: 480px;
+            height: 480px;
+        }
+
+        .wheel {
+            width: 480px;
+            height: 480px;
+            border-radius: 50%;
+            background: #8B4513;
+            border: 16px solid #654321;
+            position: relative;
+        }
+
+        .ball {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #e0e0e0);
+            border-radius: 50%;
+            top: 48px;
+            left: 232px;
+            transform-origin: 8px 192px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            z-index: 100;
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 160px;
+            left: 160px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: #654321;
+            border: 3px solid #8B4513;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-result {
+            position: absolute;
+            top: 160px;
+            left: 160px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: rgba(101, 67, 33, 0.95);
+            border: 3px solid #8B4513;
+            z-index: 150;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .center-result.show {
+            display: flex;
+        }
+
+        .result-content {
+            color: white;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+
+        .result-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-winner {
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .controls {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .controls input, .controls button {
+            margin: 5px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .controls button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .controls button:hover {
+            background: #218838;
+        }
+
+        .controls button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .players-list {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .player-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background: #dc3545 !important;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .remove-btn:hover {
+            background: #c82333 !important;
+        }
+
+        .new-round-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            margin-top: 8px;
+        }
+
+        .new-round-btn:hover {
+            background: #218838;
+        }
+
+        @keyframes ballSpin {
+            from { 
+                transform: rotate(0deg); 
+            }
+            to { 
+                transform: rotate(var(--final-angle)); 
+            }
+        }
+
+        .ball.spinning {
+            animation: ballSpin 4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+        }
+
+        .controls h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="wheel-container">
+            <div class="wheel" id="wheel">
+                <div class="ball" id="ball"></div>
+                <div class="center-circle"></div>
+                <div class="center-result" id="centerResult">
+                    <div class="result-content" id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3>enter player</h3>
+            <input type="text" id="playerName" placeholder="enter name">
+            <input type="number" id="playerNumber" min="0" max="36" placeholder="0-36">
+            <button onclick="addPlayer()">add player</button>
+            <button onclick="startSpin()" id="spinBtn">Spin</button>
+        </div>
+
+        <div class="players-list" id="playersList">
+            <h3>player</h3>
+            <div id="playersContent">no player added</div>
+        </div>
+    </div>
+
+    <script>
+        const rouletteSequence = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        
+        const numberColors = {
+            0: 'green',
+            1: 'red', 2: 'black', 3: 'red', 4: 'black', 5: 'red',
+            6: 'black', 7: 'red', 8: 'black', 9: 'red', 10: 'black',
+            11: 'black', 12: 'red', 13: 'black', 14: 'red', 15: 'black',
+            16: 'red', 17: 'black', 18: 'red', 19: 'red', 20: 'black',
+            21: 'red', 22: 'black', 23: 'red', 24: 'black', 25: 'red',
+            26: 'black', 27: 'red', 28: 'black', 29: 'black', 30: 'red',
+            31: 'black', 32: 'red', 33: 'black', 34: 'red', 35: 'black', 36: 'red'
+        };
+
+        let players = [];
+        let isSpinning = false;
+
+        // Berechnet den kürzesten numerischen Abstand zwischen zwei Zahlen (0-36 Kreis)
+        function getShortestNumericalDistance(number1, number2) {
+            // Direkter Abstand
+            const directDistance = Math.abs(number1 - number2);
+            
+            // Abstand über den "Kreis" (von 36 zu 0 und umgekehrt)
+            const wrapAroundDistance = 37 - directDistance;
+            
+            // Kürzeren Abstand zurückgeben
+            return Math.min(directDistance, wrapAroundDistance);
+        }
+
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 448;
+            canvas.height = 448;
+            canvas.style.position = 'absolute';
+            canvas.style.top = '16px';
+            canvas.style.left = '16px';
+            canvas.style.borderRadius = '50%';
+            
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 216;
+            
+            rouletteSequence.forEach((number, index) => {
+                const startAngle = (index * 2 * Math.PI) / 37 - Math.PI / 2;
+                const endAngle = ((index + 1) * 2 * Math.PI) / 37 - Math.PI / 2;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                
+                if (numberColors[number] === 'red') {
+                    ctx.fillStyle = '#dc3545';
+                } else if (numberColors[number] === 'black') {
+                    ctx.fillStyle = '#000000';
+                } else {
+                    ctx.fillStyle = '#28a745';
+                }
+                ctx.fill();
+                
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                const textAngle = startAngle + (endAngle - startAngle) / 2;
+                const textX = centerX + Math.cos(textAngle) * (radius * 0.8);
+                const textY = centerY + Math.sin(textAngle) * (radius * 0.8);
+                
+                ctx.save();
+                ctx.translate(textX, textY);
+                ctx.rotate(textAngle + Math.PI / 2);
+                
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(-16, -12, 32, 24);
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 19px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(number.toString(), 0, 0);
+                
+                ctx.restore();
+            });
+            
+            wheel.appendChild(canvas);
+        }
+
+        function addPlayer() {
+            const name = document.getElementById('playerName').value.trim();
+            const number = parseInt(document.getElementById('playerNumber').value);
+            
+            if (!name) {
+                alert('Bitte Namen eingeben!');
+                return;
+            }
+            
+            if (isNaN(number) || number < 0 || number > 36) {
+                alert('enter number 0-36!');
+                return;
+            }
+            
+            if (players.some(p => p.name === name)) {
+                alert('Spieler mit diesem Namen existiert bereits!');
+                return;
+            }
+            
+            players.push({ name, number });
+            updatePlayersList();
+            
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerNumber').value = '';
+        }
+
+        function updatePlayersList() {
+            const content = document.getElementById('playersContent');
+            
+            if (players.length === 0) {
+                content.innerHTML = 'Noch keine Spieler hinzugefügt';
+                return;
+            }
+            
+            content.innerHTML = players.map((player, index) => 
+                `<div class="player-item">
+                    <span><strong>${player.name}</strong> → number <strong>${player.number}</strong></span>
+                    <button class="remove-btn" onclick="removePlayer(${index})">delete</button>
+                </div>`
+            ).join('');
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            updatePlayersList();
+        }
+
+        function startSpin() {
+            if (isSpinning) return;
+            
+            if (players.length === 0) {
+                alert('Bitte mindestens einen Spieler hinzufügen!');
+                return;
+            }
+            
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('centerResult').classList.remove('show');
+            
+            const ball = document.getElementById('ball');
+            const winningNumber = rouletteSequence[Math.floor(Math.random() * 37)];
+            const winningIndex = rouletteSequence.indexOf(winningNumber);
+            
+            ball.classList.remove('spinning');
+            ball.style.transform = 'rotate(0deg)';
+            
+            const segmentAngle = 360 / 37;
+            const segmentMidAngle = (winningIndex * segmentAngle) + (segmentAngle / 2);
+            const finalAngle = segmentMidAngle + (360 * 8);
+            
+            ball.style.setProperty('--final-angle', `${finalAngle}deg`);
+            
+            setTimeout(() => {
+                ball.classList.add('spinning');
+            }, 100);
+            
+            setTimeout(() => {
+                showResults(winningNumber);
+                
+                setTimeout(() => {
+                    isSpinning = false;
+                    document.getElementById('spinBtn').disabled = false;
+                }, 2000);
+            }, 4200);
+        }
+
+        function showResults(winningNumber) {
+            const exactWinners = players.filter(p => p.number === winningNumber);
+            let closestWinner = null;
+            let minDistance = 37;
+            
+            if (exactWinners.length === 0) {
+                players.forEach(player => {
+                    const distance = getShortestNumericalDistance(player.number, winningNumber);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestWinner = player;
+                    }
+                });
+            }
+            
+            const resultContent = document.getElementById('resultContent');
+            const centerResult = document.getElementById('centerResult');
+            
+            const numberColor = numberColors[winningNumber] === 'red' ? '#dc3545' : 
+                              numberColors[winningNumber] === 'black' ? '#000000' : '#28a745';
+            
+            let html = `<div class="result-number" style="color: ${numberColor}">${winningNumber}</div>`;
+            
+            if (exactWinners.length > 0) {
+                html += `<div style="color: #28a745; font-weight: bold;">🏆 direct hit!</div>`;
+                html += `<div class="result-winner">${exactWinners[0].name}</div>`;
+                if (exactWinners.length > 1) {
+                    html += `<div class="result-winner">+${exactWinners.length - 1} weitere</div>`;
+                }
+            } else if (closestWinner) {
+                html += `<div style="color: #007bff; font-weight: bold;">🥈 nearest</div>`;
+                html += `<div class="result-winner">${closestWinner.name}</div>`;
+                html += `<div class="result-winner">(difference: ${minDistance})</div>`;
+            } else {
+                html += `<div style="color: #6c757d;">no hit</div>`;
+            }
+            
+            html += `<button class="new-round-btn" onclick="newRound()">new round</button>`;
+            
+            resultContent.innerHTML = html;
+            centerResult.classList.add('show');
+        }
+
+        function newRound() {
+            document.getElementById('centerResult').classList.remove('show');
+            const ball = document.getElementById('ball');
+            ball.classList.remove('spinning');
+            ball.style.transform = 'rotate(0deg)';
+        }
+
+        // Enter-Taste für schnelle Eingabe
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                if (document.getElementById('playerName') === document.activeElement || 
+                    document.getElementById('playerNumber') === document.activeElement) {
+                    addPlayer();
+                }
+            }
+        });
+
+        window.addEventListener('load', () => {
+            createWheel();
+        });
+    </script>
+</body>
+</html>

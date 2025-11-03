@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Glücksrad</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #35654d;
+            font-family: Arial, sans-serif;
+            padding-top: 20px; /* Reduzierter oberer Abstand */
+            margin: 0;
+        }
+        canvas {
+            margin: 10px; /* Reduzierter Abstand */
+        }
+        .controls {
+            margin: 10px; /* Reduzierter Abstand */
+            position: fixed; /* Fixierte Position */
+            top: 720px; /* Position direkt unter dem Rad */
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="wheelCanvas" width="800" height="800"></canvas>
+    <div class="controls">
+        <input type="text" id="nameInput" placeholder="enter name">
+        <button id="spinButton">spin</button>
+        <button id="clearButton">clear</button>
+    </div>
+
+    <script>
+        class Wheel {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.center = { x: canvas.width / 2, y: canvas.height / 2 };
+                this.radius = 250;
+                this.angle = Math.random() * 360;
+                this.spinning = false;
+                this.spinSpeed = 0;
+                this.names = [];
+                this.colors = [
+                    '#FF6347', // Tomato
+                    '#FFA500', // Orange
+                    '#FFD700', // Gold
+                    '#9ACD32', // Yellow Green
+                    '#6495ED', // Cornflower Blue
+                    '#9370DB', // Medium Purple
+                    '#FFB6C1', // Light Pink
+                    '#40E0D0'  // Turquoise
+                ];
+            }
+
+            addName(name) {
+                this.names.push(name);
+                this.draw();
+            }
+
+            spin() {
+                if (!this.spinning && this.names.length > 0) {
+                    this.spinning = true;
+                    this.spinSpeed = Math.random() * 10 + 20;
+                    this.animate();
+                }
+            }
+
+            animate() {
+                if (this.spinning) {
+                    this.angle -= this.spinSpeed;
+                    this.spinSpeed *= 0.99;
+
+                    if (this.spinSpeed < 0.01) {
+                        this.spinning = false;
+                        this.spinSpeed = 0;
+                        this.showWinner();
+                    }
+
+                    this.draw();
+                    requestAnimationFrame(() => this.animate());
+                }
+            }
+
+            showWinner() {
+                const winner = this.getSelectedName();
+                if (winner) {
+                    this.ctx.font = '48px Arial';
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(`${winner} !`, this.center.x, 50);
+                }
+            }
+
+            getSelectedName() {
+                if (this.names.length === 0) return null;
+                
+                const segmentAngle = 360 / this.names.length;
+                const currentAngle = this.angle % 360;
+                const pointerPosition = (360 - currentAngle - 90) % 360;
+                let segmentIndex = Math.floor(pointerPosition / segmentAngle);
+                
+                if (segmentIndex >= this.names.length) {
+                    segmentIndex = 0;
+                }
+                
+                return this.names[segmentIndex];
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Zeichne den Grundkreis
+                this.ctx.beginPath();
+                this.ctx.arc(this.center.x, this.center.y, this.radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = 'white';
+                this.ctx.fill();
+                this.ctx.strokeStyle = 'black';
+                this.ctx.lineWidth = 3;
+                this.ctx.stroke();
+
+                if (this.names.length === 0) {
+                    this.ctx.font = '36px Arial';
+                    this.ctx.fillStyle = 'black';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('enter players!', this.center.x, this.center.y - 100);
+                } else {
+                    // Zeichne Segmente
+                    const segmentAngle = 360 / this.names.length;
+                    for (let i = 0; i < this.names.length; i++) {
+                        const startAngle = (i * segmentAngle + this.angle) * Math.PI / 180;
+                        const endAngle = ((i + 1) * segmentAngle + this.angle) * Math.PI / 180;
+
+                        // Segment zeichnen
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.center.x, this.center.y);
+                        this.ctx.arc(this.center.x, this.center.y, this.radius, startAngle, endAngle);
+                        this.ctx.closePath();
+                        this.ctx.fillStyle = this.colors[i % this.colors.length];
+                        this.ctx.fill();
+                        this.ctx.stroke();
+
+                        // Text zeichnen
+                        this.ctx.save();
+                        this.ctx.translate(
+                            this.center.x + (this.radius * 0.7) * Math.cos((startAngle + endAngle) / 2),
+                            this.center.y + (this.radius * 0.7) * Math.sin((startAngle + endAngle) / 2)
+                        );
+                        this.ctx.rotate((startAngle + endAngle) / 2 + Math.PI / 2);
+                        this.ctx.font = '24px Arial';
+                        this.ctx.fillStyle = 'black';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText(this.names[i], 0, 0);
+                        this.ctx.restore();
+                    }
+                }
+
+                // Zeiger zeichnen
+                this.drawPointer();
+            }
+
+            drawPointer() {
+                this.ctx.save();
+                this.ctx.translate(this.center.x, this.center.y);
+                this.ctx.rotate(-Math.PI / 2);
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.radius, 0);
+                this.ctx.lineTo(this.radius + 50, -10);
+                this.ctx.lineTo(this.radius + 50, 10);
+                this.ctx.closePath();
+                
+                this.ctx.fillStyle = 'red';
+                this.ctx.fill();
+                this.ctx.strokeStyle = 'black';
+                this.ctx.stroke();
+                
+                this.ctx.restore();
+            }
+
+            clear() {
+                this.names = [];
+                this.draw();
+            }
+        }
+
+        // Initialisierung
+        const canvas = document.getElementById('wheelCanvas');
+        const wheel = new Wheel(canvas);
+        const nameInput = document.getElementById('nameInput');
+        const spinButton = document.getElementById('spinButton');
+        const clearButton = document.getElementById('clearButton');
+
+        // Event Listener
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && nameInput.value.trim()) {
+                wheel.addName(nameInput.value.trim());
+                nameInput.value = '';
+            }
+        });
+
+        spinButton.addEventListener('click', () => wheel.spin());
+        clearButton.addEventListener('click', () => wheel.clear());
+
+        // Erste Zeichnung
+        wheel.draw();
+    </script>
+</body>
+</html>

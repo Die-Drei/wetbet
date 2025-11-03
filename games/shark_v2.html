@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>shark tooth game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .instructions {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .shark-head {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            margin: 0 auto;
+            background: #95a5a6;
+            border-radius: 300px 300px 150px 150px;
+            border: 8px solid #7f8c8d;
+            overflow: hidden;
+        }
+
+        .shark-eyes {
+            position: absolute;
+            top: 50px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 120px;
+            box-sizing: border-box;
+        }
+
+        .eye {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            position: relative;
+            border: 3px solid #2c3e50;
+        }
+
+        .eye::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 20px;
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .eye.angry::after {
+            background: #34495e;
+            top: 12px;
+            left: 12px;
+            width: 12px;
+            height: 12px;
+        }
+
+        .shark-mouth {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 450px;
+            height: 160px;
+            background: #2c3e50;
+            border-radius: 30px;
+            border: 5px solid #34495e;
+            transition: all 0.2s ease;
+            overflow: visible;
+        }
+
+        .shark-mouth.closing {
+            height: 30px;
+            bottom: 80px;
+            background: #34495e;
+            border-radius: 30px;
+        }
+
+        .jaw-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: #34495e;
+            border-radius: 30px 30px 0 0;
+            overflow: visible;
+            transition: all 0.2s ease;
+            z-index: 1;
+        }
+
+        .jaw-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: #34495e;
+            border-radius: 0 0 30px 30px;
+            overflow: visible;
+            transition: all 0.2s ease;
+            z-index: 1;
+        }
+
+        .shark-mouth.closing .jaw-top {
+            height: 70%;
+            background: #2c3e50;
+        }
+
+        .shark-mouth.closing .jaw-bottom {
+            height: 30%;
+            background: #2c3e50;
+        }
+
+        .mouth-interior {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 120px;
+            background: #1a252f;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            z-index: 0;
+        }
+
+        .shark-mouth.closing .mouth-interior {
+            height: 15px;
+            background: #0f1419;
+        }
+
+        .teeth-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .teeth-row {
+            position: absolute;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .top-teeth {
+            top: -5px;
+            height: 35px;
+        }
+
+        .bottom-teeth {
+            bottom: -5px;
+            height: 35px;
+        }
+
+        .tooth {
+            width: 16px;
+            height: 32px;
+            background: #ecf0f1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #bdc3c7;
+            position: relative;
+            border-radius: 3px;
+            z-index: 15;
+        }
+
+        .tooth-top {
+            clip-path: polygon(20% 0%, 80% 0%, 50% 100%);
+            transform-origin: top;
+        }
+
+        .tooth-bottom {
+            clip-path: polygon(50% 0%, 20% 100%, 80% 100%);
+            transform-origin: bottom;
+        }
+
+        .tooth:hover {
+            background: #f39c12;
+            transform: scale(1.2);
+            box-shadow: 0 0 12px rgba(243, 156, 18, 0.7);
+            z-index: 20;
+        }
+
+        .tooth.pulled {
+            opacity: 0;
+            transform: scale(0) rotate(45deg);
+            pointer-events: none;
+        }
+
+        .tooth.bad-tooth {
+            background: #e67e22;
+            border-color: #d35400;
+            animation: danger-pulse 1.5s infinite;
+            z-index: 15;
+        }
+
+        @keyframes danger-pulse {
+            0%, 100% { 
+                background: #e67e22;
+                box-shadow: 0 0 5px rgba(230, 126, 34, 0.5);
+            }
+            50% { 
+                background: #d35400;
+                box-shadow: 0 0 15px rgba(230, 126, 34, 0.8);
+            }
+        }
+
+        .message {
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .win-message {
+            color: #27ae60;
+            animation: celebration 1s ease-in-out;
+        }
+
+        .lose-message {
+            color: #e67e22;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .tongue {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 25px;
+            background: #e91e63;
+            border-radius: 40px;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            z-index: 1;
+        }
+
+        .shark-mouth.closing .tongue {
+            height: 8px;
+            bottom: 8px;
+            width: 40px;
+        }
+
+        .gums {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #e74c3c 0%, #c0392b 100%);
+            border-radius: 30px 30px 0 0;
+            opacity: 0.4;
+            z-index: 2;
+        }
+
+        .jaw-bottom .gums {
+            background: linear-gradient(to top, #e74c3c 0%, #c0392b 100%);
+            border-radius: 0 0 30px 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <p class="instructions">Carefully pull the shark’s teeth! But be careful — 3 out of 30 are dangerous!</p>
+        
+        <div class="shark-head">
+            <div class="shark-eyes">
+                <div class="eye" id="leftEye"></div>
+                <div class="eye" id="rightEye"></div>
+            </div>
+            
+            <div class="shark-mouth" id="sharkMouth">
+                <div class="mouth-interior">
+                    <div class="tongue"></div>
+                </div>
+                
+                <div class="jaw-top">
+                    <div class="gums"></div>
+                    <div class="teeth-container">
+                        <div class="teeth-row top-teeth" id="topTeeth">
+                            <!-- Obere Zähne werden hier generiert -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="jaw-bottom">
+                    <div class="gums"></div>
+                    <div class="teeth-container">
+                        <div class="teeth-row bottom-teeth" id="bottomTeeth">
+                            <!-- Untere Zähne werden hier generiert -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="message" id="gameMessage"></div>
+
+        <div class="control-buttons">
+            <button class="btn btn-primary" onclick="startNewGame()">new game</button>
+        </div>
+    </div>
+
+    <script>
+        class SharkToothGame {
+            constructor() {
+                this.totalTeeth = 30;
+                this.dangerousTeeth = 3;
+                this.pulledTeeth = 0;
+                this.gameOver = false;
+                this.dangerousIndices = [];
+                this.teethElements = [];
+                
+                this.initializeGame();
+            }
+
+            initializeGame() {
+                this.generateDangerousTeeth();
+                this.createTeeth();
+                this.resetVisuals();
+            }
+
+            generateDangerousTeeth() {
+                this.dangerousIndices = [];
+                while (this.dangerousIndices.length < this.dangerousTeeth) {
+                    const randomIndex = Math.floor(Math.random() * this.totalTeeth);
+                    if (!this.dangerousIndices.includes(randomIndex)) {
+                        this.dangerousIndices.push(randomIndex);
+                    }
+                }
+            }
+
+            createTeeth() {
+                const topTeeth = document.getElementById('topTeeth');
+                const bottomTeeth = document.getElementById('bottomTeeth');
+                
+                // Zähne löschen
+                topTeeth.innerHTML = '';
+                bottomTeeth.innerHTML = '';
+                this.teethElements = [];
+
+                // Obere Zähne erstellen (15 Stück)
+                for (let i = 0; i < 15; i++) {
+                    const tooth = this.createTooth(i, 'tooth-top');
+                    topTeeth.appendChild(tooth);
+                    this.teethElements.push(tooth);
+                }
+
+                // Untere Zähne erstellen (15 Stück)
+                for (let i = 15; i < 30; i++) {
+                    const tooth = this.createTooth(i, 'tooth-bottom');
+                    bottomTeeth.appendChild(tooth);
+                    this.teethElements.push(tooth);
+                }
+            }
+
+            createTooth(index, className) {
+                const tooth = document.createElement('div');
+                tooth.className = `tooth ${className}`;
+                tooth.dataset.index = index;
+                tooth.addEventListener('click', () => this.pullTooth(index));
+                return tooth;
+            }
+
+            pullTooth(index) {
+                if (this.gameOver) return;
+                
+                const tooth = this.teethElements[index];
+                if (tooth.classList.contains('pulled')) return;
+
+                // Zahn ziehen
+                tooth.classList.add('pulled');
+                this.pulledTeeth++;
+
+                // Prüfen ob gefährlicher Zahn
+                if (this.dangerousIndices.includes(index)) {
+                    this.gameOver = true;
+                    setTimeout(() => this.triggerGameOver(), 100);
+                    return;
+                }
+
+                // Prüfen ob gewonnen
+                if (this.pulledTeeth === this.totalTeeth - this.dangerousTeeth) {
+                    this.gameOver = true;
+                    setTimeout(() => this.triggerWin(), 100);
+                    return;
+                }
+            }
+
+            triggerGameOver() {
+                // Hai-Maul schließen
+                const sharkMouth = document.getElementById('sharkMouth');
+                const leftEye = document.getElementById('leftEye');
+                const rightEye = document.getElementById('rightEye');
+                const message = document.getElementById('gameMessage');
+
+                sharkMouth.classList.add('closing');
+                leftEye.classList.add('angry');
+                rightEye.classList.add('angry');
+
+                // Gefährliche Zähne markieren
+                this.dangerousIndices.forEach(index => {
+                    if (!this.teethElements[index].classList.contains('pulled')) {
+                        this.teethElements[index].classList.add('bad-tooth');
+                    }
+                });
+
+                message.textContent = '💥 SNAP! You pulled a bad tooth! The shark has bitten!';
+                message.className = 'message lose-message';
+
+                // Sound-Effekt simulieren
+                this.playSnapSound();
+            }
+
+            triggerWin() {
+                const message = document.getElementById('gameMessage');
+                message.textContent = '🎉 Congratulations! You’ve pulled out all the safe teeth and won!';
+                message.className = 'message win-message';
+                
+                // Celebration-Effekt
+                this.playCelebrationEffect();
+            }
+
+            playSnapSound() {
+                // Visueller "Sound"-Effekt
+                document.body.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 500);
+            }
+
+            playCelebrationEffect() {
+                // Konfetti-Effekt simulieren
+                const container = document.querySelector('.game-container');
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.style.position = 'absolute';
+                        confetti.style.width = '10px';
+                        confetti.style.height = '10px';
+                        confetti.style.background = ['#f39c12', '#3498db', '#27ae60', '#9b59b6'][Math.floor(Math.random() * 4)];
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.top = '-10px';
+                        confetti.style.animation = 'fall 2s linear forwards';
+                        container.appendChild(confetti);
+                        
+                        setTimeout(() => confetti.remove(), 2000);
+                    }, i * 100);
+                }
+            }
+
+            resetVisuals() {
+                const sharkMouth = document.getElementById('sharkMouth');
+                const leftEye = document.getElementById('leftEye');
+                const rightEye = document.getElementById('rightEye');
+                const message = document.getElementById('gameMessage');
+
+                sharkMouth.classList.remove('closing');
+                leftEye.classList.remove('angry');
+                rightEye.classList.remove('angry');
+                message.textContent = '';
+                message.className = 'message';
+            }
+
+            reset() {
+                this.pulledTeeth = 0;
+                this.gameOver = false;
+                this.dangerousIndices = [];
+                this.initializeGame();
+            }
+        }
+
+        // Globale Spielinstanz
+        let game = new SharkToothGame();
+
+        function startNewGame() {
+            game.reset();
+        }
+
+        // CSS für Konfetti-Animation hinzufügen
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
